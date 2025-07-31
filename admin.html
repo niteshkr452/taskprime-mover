@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel | PrimeTask Movers</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+
+    th {
+      background-color: #007BFF;
+      color: white;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    .loading {
+      text-align: center;
+      font-weight: bold;
+      color: #555;
+    }
+
+    .error {
+      color: red;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>📨 Contact Form Submissions</h2>
+  <div class="loading" id="loading">Loading data...</div>
+  <div class="error" id="error" style="display: none;">❌ Unable to load data.</div>
+  
+  <table id="dataTable" style="display: none;">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Subject</th>
+        <th>Submitted At</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    fetch('/admin/messages')
+      .then(res => {
+        if (!res.ok) throw new Error('Network error');
+        return res.json();
+      })
+      .then(data => {
+        document.getElementById('loading').style.display = 'none';
+        const table = document.getElementById('dataTable');
+        const tbody = table.querySelector('tbody');
+
+        if (data.length === 0) {
+          document.getElementById('error').textContent = "No messages found.";
+          document.getElementById('error').style.display = 'block';
+          return;
+        }
+
+        data.forEach(item => {
+          const row = document.createElement('tr');
+          const formattedDate = new Date(item.timestamp).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+          row.innerHTML = `
+            <td>${item.name}</td>
+            <td>${item.email}</td>
+            <td>${item.subject}</td>
+            <td>${formattedDate}</td>
+          `;
+          tbody.appendChild(row);
+        });
+
+        table.style.display = 'table';
+      })
+      .catch(error => {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').style.display = 'block';
+        console.error(error);
+      });
+  </script>
+</body>
+</html>
